@@ -22,7 +22,7 @@
 #endif
 #define LOG(fmt, ...) if(DEBUG)NSLog((@"%s:%d %s " fmt), __FILE__, __LINE__, __PRETTY_FUNCTION__, ##__VA_ARGS__)
 
-Memimage *gscreen; 
+Memimage *gscreen;
 extern int scalef;
 
 @interface DrawLayer : CAMetalLayer
@@ -69,7 +69,7 @@ guimain(void)
 	}
 }
 
-/* 
+/*
  * 0: No scaling, use display resolution
  * 1: Use macOS default scaling
  * n: Scale by n based off display res
@@ -344,8 +344,8 @@ mainproc(void *aux)
 	LOG(@"BEGIN");
 
 	NSMenu *sm = [NSMenu new];
-	[sm addItemWithTitle:@"Toggle Full Screen" action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
-	[sm addItemWithTitle:@"Hide" action:@selector(hide:) keyEquivalent:@"h"];
+	[sm addItemWithTitle:@"Toggle Full Screen" action:@selector(toggleFullScreen:) keyEquivalent:@"F"];
+	[sm addItemWithTitle:@"Hide" action:@selector(hide:) keyEquivalent:@"H"];
 	[sm addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
 	NSMenu *m = [NSMenu new];
 	[m addItemWithTitle:@"DEVDRAW" action:NULL keyEquivalent:@""];
@@ -373,6 +373,8 @@ mainproc(void *aux)
 	[_window setRestorable:NO];
 	[_window setAcceptsMouseMovedEvents:YES];
 	[_window setDelegate:self];
+
+	[_window toggleFullScreen:nil];
 
 	myview = [DrawtermView new];
 	[_window setContentView:myview];
@@ -592,11 +594,13 @@ evkey(uint v)
 		}else
 			kbdkey(Kalt, 1);
 	}
-	if((x & NSEventModifierFlagCommand) != 0)
+	if((x & NSEventModifierFlagCommand) != 0){
 		if(u){
 			u |= 4;
 			[self sendmouse:u];
-		}
+		}else
+			kbdkey(Kmod4, 1);
+	}
 	if((x & ~_mods & NSEventModifierFlagCapsLock) != 0)
 		kbdkey(Kcaps, 1);
 	if((~x & _mods & NSEventModifierFlagShift) != 0)
@@ -611,6 +615,9 @@ evkey(uint v)
 			_breakcompose = NO;
 		}
 	}
+	if((~x & _mods & NSEventModifierFlagCommand) != 0)
+		kbdkey(Kmod4, 0);
+
 	if((~x & _mods & NSEventModifierFlagCapsLock) != 0)
 		kbdkey(Kcaps, 0);
 	_mods = x;
