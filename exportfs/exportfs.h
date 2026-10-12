@@ -90,6 +90,7 @@ extern char Enotdir[];
 extern char Edupfid[];
 extern char Eopen[];
 extern char Exmnt[];
+extern char Ename[];
 
 Extern File	*root;
 Extern File	*psmpt;

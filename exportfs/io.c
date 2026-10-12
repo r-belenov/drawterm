@@ -255,7 +255,9 @@ file(File *parent, char *name)
 
 	DEBUG("\tfile: 0x%p %s name %s\n", parent, parent->name, name);
 
-	path = makepath(parent, name);
+ 	path = makepath(parent, name);
+	if(path == nil)
+ 		return nil;
 	dir = dirstat(path);
 	free(path);
 	if(dir == nil)
@@ -327,14 +329,34 @@ initroot(void)
 	psmpt = file(psmpt, "exportfs");
 }
 
+static int
+okname(char *s)
+{
+	if(s[0] == 0)
+		return 0;
+	if(strcmp(s, ".") == 0)
+		return 0;
+	for(; *s; s++)
+		if((*s & 0xff) < 0x20 || *s == '/')
+			return 0;
+	return 1;
+}
+
 char*
 makepath(File *p, char *name)
 {
 	int i, n;
 	char *c, *s, *path, *seg[256];
 
-	seg[0] = name;
-	n = strlen(name)+2;
+	if(name != nil && !okname(name)){
+		werrstr(Ename);
+		return nil;
+	}
+	if(name == nil)
+		seg[0] = "";
+	else
+		seg[0] = name;
+	n = strlen(seg[0])+2;
 	for(i = 1; i < 256 && p; i++, p = p->parent){
 		seg[i] = p->name;
 		n += strlen(p->name)+1;
