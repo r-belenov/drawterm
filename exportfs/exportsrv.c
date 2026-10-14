@@ -15,6 +15,7 @@ char Enopsmt[] = "Out of pseudo mount points";
 char Enomem[] = "No memory";
 char Ereadonly[] = "File system read only";
 char Emsize[] = "message size too small";
+char Ename[] = "Invalid character in file name";
 
 int readonly;
 
@@ -221,9 +222,11 @@ Xstat(Fsrpc *t)
 	}
 	if(f->fid >= 0)
 		d = dirfstat(f->fid);
-	else {
-		path = makepath(f->f, "");
-		d = dirstat(path);
+	else{
+		if((path = makepath(f->f, nil)) != nil)
+			d = dirstat(path);
+		else
+			d = nil;
 		free(path);
 	}
 
@@ -331,9 +334,9 @@ Xremove(Fsrpc *t)
 		return;
 	}
 
-	path = makepath(f->f, "");
+	path = makepath(f->f, nil);
 	DEBUG("\tremove: %s\n", path);
-	if(remove(path) < 0) {
+	if(path == nil || remove(path) < 0) {
 		free(path);
 		errstr(err, sizeof err);
 		reply(&t->work, &rhdr, err);
@@ -384,8 +387,10 @@ Xwstat(Fsrpc *t)
 	if(f->fid >= 0)
 		s = dirfwstat(f->fid, &d);
 	else {
-		path = makepath(f->f, "");
-		s = dirwstat(path, &d);
+		if((path = makepath(f->f, nil)) != nil)
+			s = dirwstat(path, &d);
+		else
+			s = -1;
 		free(path);
 	}
 	if(s < 0) {
@@ -539,16 +544,13 @@ slaveopen(Fsrpc *p)
 		f->fid = -1;
 	}
 	
-	path = makepath(f->f, "");
+	if((path = makepath(f->f, nil)) == nil)
+		goto Error;
 	DEBUG("\topen: %s %d\n", path, work->mode);
 	f->fid = open(path, work->mode);
 	free(path);
-	if(f->fid < 0 || (d = dirfstat(f->fid)) == nil) {
-	Error:
-		errstr(err, sizeof err);
-		reply(work, &rhdr, err);
-		return;
-	}
+	if(f->fid < 0 || (d = dirfstat(f->fid)) == nil)
+		goto Error;
 	f->f->qid = d->qid;
 	free(d);
 	if(f->f->qid.type & QTMOUNT){	/* fork new exportfs for this */
@@ -563,7 +565,10 @@ slaveopen(Fsrpc *p)
 	rhdr.iounit = getiounit(f->fid);
 	rhdr.qid = f->f->qid;
 	reply(work, &rhdr, 0);
-}
+	return;
+Error:
+	errstr(err, sizeof err);
+	reply(work, &rhdr, err);}
 
 void
 slaveread(Fsrpc *p)
