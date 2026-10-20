@@ -638,7 +638,7 @@ evkey(uint v)
 	}
 }
 
-- (void) mouseevent:(NSEvent*)event
+- (void) mouseevent:(NSEvent*)event button:(NSUInteger)b
 {
 	NSPoint p;
 	NSSize s;
@@ -653,6 +653,7 @@ evkey(uint v)
 	q.y = p.y;
 	if(!ptinrect(q, gscreen->clipr)) return;
 	u = (u&~6) | (u&4)>>1 | (u&2)<<1;
+    if (b) u = b;
 	if(u == 1){
 		m = [event modifierFlags];
 		if(m & NSEventModifierFlagOption){
@@ -673,16 +674,16 @@ evkey(uint v)
 		[self resetLastInputRect];
 }
 
-- (void) mouseDown:(NSEvent*)event { [self mouseevent:event]; }
-- (void) mouseDragged:(NSEvent*)event { [self mouseevent:event]; }
-- (void) mouseUp:(NSEvent*)event { [self mouseevent:event]; }
-- (void) mouseMoved:(NSEvent*)event { [self mouseevent:event]; }
-- (void) rightMouseDown:(NSEvent*)event { [self mouseevent:event]; }
-- (void) rightMouseDragged:(NSEvent*)event { [self mouseevent:event]; }
-- (void) rightMouseUp:(NSEvent*)event { [self mouseevent:event]; }
-- (void) otherMouseDown:(NSEvent*)event { [self mouseevent:event]; }
-- (void) otherMouseDragged:(NSEvent*)event { [self mouseevent:event]; }
-- (void) otherMouseUp:(NSEvent*)event { [self mouseevent:event]; }
+- (void) mouseDown:(NSEvent*)event { [self mouseevent:event button:1]; }
+- (void) mouseDragged:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) mouseUp:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) mouseMoved:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) rightMouseDown:(NSEvent*)event { [self mouseevent:event button:4]; }
+- (void) rightMouseDragged:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) rightMouseUp:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) otherMouseDown:(NSEvent*)event { [self mouseevent:event button:2]; }
+- (void) otherMouseDragged:(NSEvent*)event { [self mouseevent:event button:0]; }
+- (void) otherMouseUp:(NSEvent*)event { [self mouseevent:event button:0]; }
 
 - (void) scrollWheel:(NSEvent*)event{
 	NSInteger s = [event scrollingDeltaY];
