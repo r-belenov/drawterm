@@ -692,6 +692,12 @@ evkey(uint v)
 
 - (void) scrollWheel:(NSEvent*)event{
 	NSInteger s = [event scrollingDeltaY];
+    static int counter = 0;
+    if (counter < 4){
+        counter++;
+        return;
+    }
+    counter = 0;
 	if(s > 0)
 		[self sendmouse:8];
 	else if(s < 0)
