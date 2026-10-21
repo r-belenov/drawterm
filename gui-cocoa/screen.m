@@ -636,6 +636,10 @@ evkey(uint v)
 		kbdkey(Kalt, 0);
 		_mods ^= NSEventModifierFlagOption;
 	}
+	if((_mods & NSEventModifierFlagCommand) != 0){
+		kbdkey(Kmod4, 0);
+		_mods ^= NSEventModifierFlagCommand;
+	}
 }
 
 - (void) mouseevent:(NSEvent*)event clickedbutton:(NSUInteger)b
@@ -653,7 +657,7 @@ evkey(uint v)
 	q.y = p.y;
 	if(!ptinrect(q, gscreen->clipr)) return;
 	u = (u&~6) | (u&4)>>1 | (u&2)<<1;
-    u |= b;
+	u |= b;
 	if(u == 1){
 		m = [event modifierFlags];
 		if(m & NSEventModifierFlagOption){
@@ -669,7 +673,7 @@ evkey(uint v)
 
 - (void) mouseevent:(NSEvent*)event
 {
-    [self mouseevent: event clickedbutton: 0];
+	[self mouseevent: event clickedbutton: 0];
 }
 
 - (void) sendmouse:(NSUInteger)u
@@ -692,12 +696,12 @@ evkey(uint v)
 
 - (void) scrollWheel:(NSEvent*)event{
 	NSInteger s = [event scrollingDeltaY];
-    static int counter = 0;
-    if (counter < 4){
-        counter++;
-        return;
-    }
-    counter = 0;
+	static int counter = 0;
+	if (counter < 4){
+	    counter++;
+	    return;
+	}
+	counter = 0;
 	if(s > 0)
 		[self sendmouse:8];
 	else if(s < 0)
