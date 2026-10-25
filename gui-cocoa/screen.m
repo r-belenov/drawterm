@@ -43,7 +43,7 @@ extern int scalef;
 
 static AppDelegate *myApp;
 static DrawtermView *myview;
-static NSCursor *currentCursor;
+static NSCursor * __strong currentCursor = nil;
 
 static ulong pal[256];
 
